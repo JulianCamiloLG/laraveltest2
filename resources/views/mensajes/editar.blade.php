@@ -43,6 +43,14 @@
             </div>
             <button class="btn btn-primary btn-lg btn-block">Enviar</button>
         </form>
+        <form method="post" action={{ route('mensajes.update', $mensaje->id) }}>
+            {!! method_field('PUT') !!}
+            @include('mensajes.form', ['btnText' => 'Actualizar'])
+        </form>
+
+        <form method="post" action={{ route('mensajes.store') }}>
+            @include('mensajes.form', ['mensaje' => new App\Mensaje])
+         </form>
 
     </div>
         

@@ -56,15 +56,22 @@ class MensajeController extends Controller
         // ]);
         // // redireccionar. Más adelante se le pedirá que cambie esto
         // return redirect()->route('mensajes.index');
-        Mensaje::create([
-            'nombre' => $request->input('nombre'),
-            'email' => $request->input('correo'),
-            'asunto' => $request->input('asunto'),
-            'contenido' => $request->input('contenido')
-        ]); 
-        // Mensaje::create($request->all()); //Esta forma de creacion es asumiendo que desde el formulario se envian todos los datos necesarios      
-        dd($request->all()); //Perlita
-        return redirect()->route('mensajes.index');
+        if (auth()->check()) {
+            $datosUsuario = auth()->user()->getAttributes();
+            $request->request->add([
+                'nombre' => $datosUsuario['name'],
+                'email' => $datosUsuario['email'],
+            ]);
+        }
+ 
+        $mensaje = Mensaje::create($request->all());
+ 
+        if (auth()->check()) {
+            auth()->user()->messages()->save($mensaje);
+        }
+ 
+        return redirect()->route('mensajes.create')
+               ->with('info', 'Hemos recibido tu mensaje');
     }
 
     /**

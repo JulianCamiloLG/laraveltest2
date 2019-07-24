@@ -37,17 +37,18 @@ class User extends Authenticatable
     ];
 
     public function hasRoles(array $roles) {
-        foreach ($roles as $role) {
-            foreach ($this->roles as $userRole) {
-                if ($userRole->nombre === $role) {
-                    return true;
-                }
-            }
-        }
-        return false;
+        return $this->roles->pluck('nombre')->intersect($roles)->count();
     }
     
     public function roles() {
         return $this->belongsToMany(Role::class);
     } 
+
+    public function isAdmin() {
+        return $this->hasRoles(['Administrador']);
+    }
+
+    public function setPasswordAttribute($password) {
+        $this->attributes['password'] = bcrypt($password);
+    }
 }

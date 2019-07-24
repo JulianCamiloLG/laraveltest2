@@ -2,28 +2,28 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\User;
+use App\Role;
+use Illuminate\Http\Request;
 use App\Http\Requests\UpdateUserRequest;
+use App\Http\Requests\CreateUserRequest;/////////////////////////////
 
-class UsuariosController extends Controller
-{
+class UsuariosController extends Controller {
 
-    function __construct() {
-        $this->middleware('auth');
+    function __construct() { //
+        $this->middleware('auth', ['except' => ['show']]);
         // la siguiente excepción hace que edit de usuarios pueda ser accesible para cualquier ID desde la barra de direcciones
-        $this->middleware('roles:Administrador', ['except' => ['edit']]);
+        $this->middleware('roles:Administrador', ['except' => ['destroy', 'edit', 'update', 'show']]);
     }
 
     /**
-     * Display a listing of the resource.
+     * Desplegar una lista del recurso (una lista de usuarios).
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
-    {
+    public function index() {
         $usuarios = \App\User::all();
-       return view('usuarios.index', compact('usuarios'));
+        return view('usuarios.index', compact('usuarios'));
     }
 
     /**
@@ -31,20 +31,22 @@ class UsuariosController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
-    {
-        //
+    public function create() {
+        $roles = Role::pluck('nombre', 'id');
+        return view('usuarios.crear', compact('roles'));
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Guardar un recurso (usuario) recién creado
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  App\Http\Requests\CreateUserRequest  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
-    {
-        //
+    public function store(CreateUserRequest $request) {///////////////////////////////////////////
+        // dd($request->all()); // <-- descomente para verificar datos del nuevo usuario
+        $user = User::create($request->all());
+        $user->roles()->attach($request->roles);
+		return redirect()->route('usuarios.index');
     }
 
     /**
@@ -53,36 +55,40 @@ class UsuariosController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
-    {
-        //
+    public function show($id) { 
+        $usuario = User::findOrFail($id);
+        return view('usuarios.show', compact('usuario'));
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * Mostrar el formulario para editar un recurso (usuario) específico
      *
-     * @param  int  $id
+     * @param  int  $id El id del usuario a editar
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
-    {
-        $usuario = User::findOrFail($id);
-        return view('usuarios.editar', compact('usuario'));
+    public function edit($id) {
+        $usuario = User::findOrFail($id); // se importó la clase para poder usar
+        $this->authorize($usuario);
+        $roles = Role::pluck('nombre', 'id');
+        // dd($roles); // <-- descomente si desea ver cómo llegan los datos a vista
+        return view('usuarios.editar', compact('usuario', 'roles'));
     }
 
     /**
-     * Update the specified resource in storage.
+     * Actualizar el recurso especificado en la tabla "user"
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
+     *
+     * @param  App\Http\Requests\UpdateUserRequest  $request
+     * @param  int  $id El id del usuario a actualizar
      * @return \Illuminate\Http\Response
      */
-    public function update(UpdateUserRequest $request, $id)
-    {
+    public function update(UpdateUserRequest $request, $id) {
+        // dd($request->all()); // <-- descomente para ver datos recibidos
         $usuario = User::findOrFail($id);
-        $usuario->update($request->all());
+        $this->authorize($usuario); 
+        $usuario->update($request->except('password'));  // $request->all() | $request->only | $request->except
+        $usuario->roles()->sync($request->roles); // cuidado attach duplica
         return back()->with('info', 'Usuario actualizado');
-
     }
 
     /**
@@ -91,9 +97,13 @@ class UsuariosController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
-    {
-        User::findOrFail($id)->delete();
-        return redirect()->route('usuarios.index');
+    public function destroy($id) {
+        $usuario = User::findOrFail($id);
+        // $this->authorize($usuario);  
+        // <-- quité lo anterior porque intentaría autorizar al usuario actual y lo que quiero
+        // es que cumpla con las políticas definidas en ..\app\Policies\UserPolicy.php
+        $usuario->roles()->detach(); // <-- Esto no sería necesario con eliminación en cascada
+        $usuario->delete();
+        return back();
     }
 }
