@@ -76,6 +76,8 @@ class MensajeController extends Controller
               //           ->subject('Tu mensaje fue recibido');
                //   }
         //);
+
+        event(new MensajeRecibido($mensaje));
  
         return redirect()->route('mensajes.create')
                ->with('info', 'Hemos recibido tu mensaje');
