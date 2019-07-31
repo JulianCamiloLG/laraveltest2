@@ -51,4 +51,12 @@ class User extends Authenticatable
     public function setPasswordAttribute($password) {
         $this->attributes['password'] = bcrypt($password);
     }
+
+    public function nota() { // <-- un nombre cualquiera
+        // se puede usar morphOne/morphMany
+        return $this->morphOne(Nota::class, 'anotacion'); // param2 = llave o prefijo, ver migración: $table->integer('anotacion_id')->unsigned();
+    }
+    public function etiquetas() {
+		return $this->morphToMany(Etiqueta::class, 'etiquetable')->withTimestamps(); // <-- forzar registrar created_at y updated_at
+	}
 }

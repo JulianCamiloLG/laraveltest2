@@ -133,4 +133,9 @@ return [
 
     'log_channel' => env('MAIL_LOG_CHANNEL'),
 
+    'from' => [
+        'address' => env('MAIL_FROM_ADDRESS', 'juliancamy.81@gmail.com'),
+        'name' => env('MAIL_FROM_NAME', 'Julian Camilo Lopez'),
+    ],
+
 ];

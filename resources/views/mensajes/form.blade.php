@@ -1,19 +1,11 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Fomr</title>
-</head>
-<body>
-        @extends('plantilla')
 
-        @section('titulo', 'Contacto')
+@extends('plantilla')
+
+@section('titulo', 'Contacto')
         
-        @section('contenido')
+@section('contenido')
 <form action="{{route('mensajes.store')}}" method="post"> 
-        @unless ($mensaje->user_id) {{-- si no tiene user_id…  --}}
+    @if ($mostrarCampos) {{-- ver MensajesControler métodos create y edit --}}
         <div class="form-group">
             <label for="nombre">Nombre</label>
             <input type="input" class="form-control" 
@@ -30,7 +22,7 @@
                 value="{{ $mensaje->email ?? old('email') }}"
             >
         </div>
-        @endunless
+        @endif
         <div class="form-group">
                 <label for="asunto">Asunto</label>
                 <input type="input" class="form-control" id="asunto" name="asunto" placeholder="Motivo por el que se comunica con nosotros">
@@ -40,6 +32,7 @@
                 <label for="contenido">Contenido</label>
                 <textarea class="form-control" id="contenido" name="contenido" rows="3"></textarea>
             </div>
+            <button type="submit" class="btn btn-primary">{{ $btnText ?? 'Guardar' }}</button>
     </form>
 @endsection
 </body>

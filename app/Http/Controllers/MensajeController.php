@@ -23,7 +23,7 @@ class MensajeController extends Controller
         //
         // $mensajes = DB::table('mensajes')->get();
         // return view('mensajes.index', compact('mensajes'));
-        $mensajes = Mensaje::all();
+        $mensajes = Mensaje::with(['user', 'nota', 'etiquetas'])->get();
         return view('mensajes.index', compact('mensajes'));
     }
 
@@ -34,8 +34,8 @@ class MensajeController extends Controller
      */
     public function create()
     {
-        //
-        return view('mensajes.crear');
+        $mostrarCampos = auth()->guest();
+        return view('mensajes.crear',compact('mostrarCampos', 'mostrarCampos'));
     }
 
     /**
@@ -69,6 +69,13 @@ class MensajeController extends Controller
         if (auth()->check()) {
             auth()->user()->messages()->save($mensaje);
         }
+
+        //Mail::send('emails.respuesta-contacto', ['msg' => $mensaje], 
+          //        function ($msg) use ($mensaje) {
+            //         $msg->to($mensaje->email, $mensaje->nombre)
+              //           ->subject('Tu mensaje fue recibido');
+               //   }
+        //);
  
         return redirect()->route('mensajes.create')
                ->with('info', 'Hemos recibido tu mensaje');
@@ -98,7 +105,8 @@ class MensajeController extends Controller
         // $mensaje = DB::table('mensajes')->where('id', $id)->first();
         // return view('mensajes.editar', compact('mensaje'));
         $mensaje = Mensaje::findOrFail($id);
-        return view('mensajes.editar', compact('mensaje'));
+        $mostrarCampos = !$mensaje->user_id;
+        return view('mensajes.editar',compact('mensaje', 'mostrarCampos'));
     }
 
 

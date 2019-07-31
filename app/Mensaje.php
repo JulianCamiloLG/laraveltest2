@@ -13,7 +13,12 @@ class Mensaje extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function nota() {
-        return $this->morphOne(Nota::class, 'anotacion');
-     }
+    public function nota() { // <-- un nombre cualquiera
+        // se puede usar morphOne/morphMany
+        return $this->morphOne(Nota::class, 'anotacion'); // param2 = llave o prefijo, ver migración: $table->integer('anotacion_id')->unsigned(); 
+    }
+
+    public function etiquetas() {
+		return $this->morphToMany(Etiqueta::class, 'etiquetable');
+	}
 }

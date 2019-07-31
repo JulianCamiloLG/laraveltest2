@@ -17,6 +17,8 @@
                 <th>Tipo</th>
                 <th>Dirección</th>
                 <th>Teléfono</th>
+                <th>Notas</th>
+                <th>Etiquetas</th>
                 <th>Acciones</th>
             </tr>
         </thead>
@@ -34,6 +36,8 @@
                     </td>
                     <td>{{ $usuario->address}}</td>
                     <td>{{ $usuario->phone}}</td>
+                    <td>{{ $usuario->nota->contenido ?? '' }}</td>
+                    <td>{{ $usuario->etiquetas->pluck('nombre')->implode(', ') }}</td>
                     <td>
                         <div class="btn-group" role="group">
                             <div class="col-md-6 custom">
